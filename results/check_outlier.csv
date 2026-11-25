@@ -1,0 +1,2 @@
+run_id,timestamp,technique,strategy,fork_rate,cpu_load,llm_mode,delay_ms,eradicated,time_to_clear_ms,respawns,benign_killed,benign_total,operator,target,benign_share,valid,alive_at_kill,survivors_at_end
+doublefork_cgroup_early_10_336088_1,2026-11-24T23:08:34Z,doublefork,cgroup_early,10,idle,large,336088,0,,0,0,3,Zaara,parent,0,1,2003,4

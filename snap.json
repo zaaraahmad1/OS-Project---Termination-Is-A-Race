@@ -1,0 +1,280 @@
+{
+  "memory_status": {
+    "MemTotal": "8132220 kB",
+    "MemAvailable": "6843276 kB"
+  },
+  "process_count_by_name": {
+    "respawn": 2,
+    "bash": 2,
+    "systemd": 2,
+    "systemd-resolve": 1,
+    "systemd-udevd": 1,
+    "systemd-timesyn": 1,
+    "systemd-journal": 1,
+    "polkitd": 1,
+    "(sd-pam)": 1,
+    "login": 1
+  },
+  "top_processes": [
+    {
+      "pid": 47015,
+      "ppid": 47013,
+      "pgid": 47013,
+      "sid": 47013,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "S",
+      "name": "respawn"
+    },
+    {
+      "pid": 47013,
+      "ppid": 47010,
+      "pgid": 47013,
+      "sid": 47013,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ss",
+      "name": "respawn"
+    },
+    {
+      "pid": 33157,
+      "ppid": 1,
+      "pgid": 33157,
+      "sid": 33157,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.1,
+      "state": "Ss",
+      "name": "systemd-resolve"
+    },
+    {
+      "pid": 33103,
+      "ppid": 1,
+      "pgid": 33103,
+      "sid": 33103,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ss",
+      "name": "systemd-udevd"
+    },
+    {
+      "pid": 33048,
+      "ppid": 1,
+      "pgid": 33048,
+      "sid": 33048,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ssl",
+      "name": "systemd-timesyn"
+    },
+    {
+      "pid": 32992,
+      "ppid": 1,
+      "pgid": 32992,
+      "sid": 32992,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.1,
+      "state": "S<s",
+      "name": "systemd-journal"
+    },
+    {
+      "pid": 32740,
+      "ppid": 1,
+      "pgid": 32740,
+      "sid": 32740,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.1,
+      "state": "Ssl",
+      "name": "polkitd"
+    },
+    {
+      "pid": 747,
+      "ppid": 672,
+      "pgid": 747,
+      "sid": 672,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "S+",
+      "name": "bash"
+    },
+    {
+      "pid": 721,
+      "ppid": 720,
+      "pgid": 720,
+      "sid": 720,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "S",
+      "name": "(sd-pam)"
+    },
+    {
+      "pid": 720,
+      "ppid": 1,
+      "pgid": 720,
+      "sid": 720,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.1,
+      "state": "Ss",
+      "name": "systemd"
+    },
+    {
+      "pid": 672,
+      "ppid": 2,
+      "pgid": 672,
+      "sid": 672,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ss",
+      "name": "login"
+    },
+    {
+      "pid": 671,
+      "ppid": 670,
+      "pgid": 671,
+      "sid": 671,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ss",
+      "name": "bash"
+    },
+    {
+      "pid": 669,
+      "ppid": 2,
+      "pgid": 669,
+      "sid": 669,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ss",
+      "name": "SessionLeader"
+    },
+    {
+      "pid": 670,
+      "ppid": 669,
+      "pgid": 669,
+      "sid": 669,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "S",
+      "name": "Relay(671)"
+    },
+    {
+      "pid": 589,
+      "ppid": 1,
+      "pgid": 589,
+      "sid": 222,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.1,
+      "state": "Sl",
+      "name": "containerd-shim"
+    },
+    {
+      "pid": 319,
+      "ppid": 1,
+      "pgid": 319,
+      "sid": 319,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.9,
+      "state": "Ssl",
+      "name": "dockerd"
+    },
+    {
+      "pid": 235,
+      "ppid": 1,
+      "pgid": 235,
+      "sid": 235,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.2,
+      "state": "Ssl",
+      "name": "unattended-upgr"
+    },
+    {
+      "pid": 227,
+      "ppid": 1,
+      "pgid": 227,
+      "sid": 227,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ss+",
+      "name": "agetty"
+    },
+    {
+      "pid": 222,
+      "ppid": 1,
+      "pgid": 222,
+      "sid": 222,
+      "cpu_percent": 0.3,
+      "memory_percent": 0.6,
+      "state": "Ssl",
+      "name": "containerd"
+    },
+    {
+      "pid": 221,
+      "ppid": 1,
+      "pgid": 221,
+      "sid": 221,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ssl",
+      "name": "rsyslogd"
+    },
+    {
+      "pid": 191,
+      "ppid": 1,
+      "pgid": 191,
+      "sid": 191,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.1,
+      "state": "Ss",
+      "name": "systemd-logind"
+    },
+    {
+      "pid": 174,
+      "ppid": 1,
+      "pgid": 174,
+      "sid": 174,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ss",
+      "name": "dbus-daemon"
+    },
+    {
+      "pid": 173,
+      "ppid": 1,
+      "pgid": 173,
+      "sid": 173,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Ss",
+      "name": "cron"
+    },
+    {
+      "pid": 6,
+      "ppid": 2,
+      "pgid": 0,
+      "sid": 0,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Sl+",
+      "name": "init"
+    },
+    {
+      "pid": 2,
+      "ppid": 1,
+      "pgid": 0,
+      "sid": 0,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.0,
+      "state": "Sl+",
+      "name": "init-systemd(Ub"
+    },
+    {
+      "pid": 1,
+      "ppid": 0,
+      "pgid": 1,
+      "sid": 1,
+      "cpu_percent": 0.0,
+      "memory_percent": 0.1,
+      "state": "Ss",
+      "name": "systemd"
+    }
+  ]
+}

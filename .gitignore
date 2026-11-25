@@ -1,0 +1,14 @@
+# compiled binaries -- build from source with: make -C red_team && gcc -Wall defender.c -o defender
+defender
+red_team/respawn
+red_team/doublefork
+red_team/hop
+red_team/watchdog
+*.o
+# Windows download metadata
+*Zone.Identifier
+# local scratch
+snap*.json
+matrix_run.out
+results.zip
+__pycache__/
