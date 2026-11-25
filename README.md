@@ -3,6 +3,40 @@
 **Operating Systems — Final Project: Applied OS, Cyber Defense and AI Agents**
 Zoya Imran (zi10204) · Zaara Ahmad (za10196) · Humna Khan (hk09629) — Section L4
 
+## Quick start
+
+Inside a Linux VM or WSL2 with cgroup v2 (see [Requirements](#requirements)):
+
+```bash
+git clone https://github.com/zaaraahmad1/OS-Project---Termination-Is-A-Race.git
+cd OS-Project---Termination-Is-A-Race
+make -C red_team                       # build the 4 attacks
+gcc -Wall defender.c -o defender       # build the defender
+sudo ./run_harness.sh --technique respawn --strategy cgroup --reps 1   # one experiment (~2 s)
+python3 summarize_results.py           # rebuild tables + figures from our results
+```
+
+To reproduce every experiment (about 4.5 hours), see
+[Run the full experiment plan](#run-the-full-experiment-plan). Our own
+results are already in [`results/`](results/) and summarised in
+[Results](#results).
+
+## Contents
+
+1. [Research question](#research-question)
+2. [Repository layout](#repository-layout)
+3. [Requirements](#requirements)
+4. [Build](#build)
+5. [Run the full experiment plan](#run-the-full-experiment-plan)
+6. [Run one experiment](#run-one-experiment): options, strategies, targeting
+7. [Using real LLM decision times](#using-real-llm-decision-times)
+8. [Output: the result CSVs](#output-the-result-csvs)
+9. [Measured LLM decision times](#measured-llm-decision-times)
+10. [Results](#results): tables, hypotheses, figures
+11. [Design notes](#design-notes)
+12. [Limitations](#limitations)
+13. [Cleaning up after an interrupted run](#cleaning-up-after-an-interrupted-run)
+
 ## Research question
 
 When an LLM endpoint defender decides to terminate a malicious process, how
@@ -27,6 +61,41 @@ loop), **Scheduling** (CPU contention decides who runs first) and
 
 ## Repository layout
 
+```
+.
+├── README.md                  this file
+├── red_team/                  the 4 termination-resistant attacks (C) + Makefile
+│   ├── respawn.c  doublefork.c  hop.c  watchdog.c
+│   └── Makefile
+├── defender.c                 the 6 termination strategies (C)
+├── run_matrix.sh              runs the whole experiment plan (phases A-F)
+├── run_harness.sh             runs one experiment configuration
+├── count_survivors.sh         independent count of surviving attack processes
+├── cpu_contention.sh          CPU load presets
+├── benign_workload.sh         innocent processes (collateral-damage check)
+├── capture_snapshot.sh        telemetry snapshot for the LLM
+├── measure_llm_delay.sh       times each model's kill decision
+├── summarize_results.py       CSVs -> summary.md + figures
+├── snap.json                  the snapshot our delays were measured on
+├── delays.txt                 measured delays (and delays_cached_prompt.txt)
+└── results/                   our experiment data
+    ├── A_baseline.csv         every attack x every strategy
+    ├── B_fork_rate.csv        fork rate 2 and 50/s
+    ├── C_cpu_load.csv         medium and high CPU load
+    ├── D_delay.csv            the three measured LLM delays
+    ├── E_benign_share.csv     benign processes share the attacker's group
+    ├── F_target_newest.csv    detector flags the newest process
+    ├── check_outlier.csv      repeat of one outlier run
+    ├── matrix_*.log           full log of every run
+    ├── summary.md             all result tables, by hypothesis
+    └── figures/
+        ├── fig1_baseline_heatmap.png   eradication rate, attack x strategy
+        ├── fig2_fork_rate.png          eradication rate vs fork rate
+        ├── fig3_cpu_load.png           time to clear under CPU load
+        ├── fig4_delay.png              share of attack removed vs LLM delay
+        └── fig5_benign_harm.png        innocent processes killed
+```
+
 | Path | What it is |
 |---|---|
 | `red_team/respawn.c` | Attack 1, **fork-respawn racing**: the parent keeps one child alive and immediately forks a replacement whenever it dies |
@@ -43,7 +112,11 @@ loop), **Scheduling** (CPU contention decides who runs first) and
 | `capture_snapshot.sh` | Runs an attack briefly and saves the system's process list as JSON telemetry for the LLM |
 | `measure_llm_delay.sh` | Measures how long TinyLlama / Llama-3.2 3B / Llama-3.1 8B take to make a kill decision |
 | `summarize_results.py` | Turns the result CSVs into `results/summary.md` (tables) and `results/figures/` (report figures) |
-| `results/` | Experiment output: one CSV per phase, run logs, summary and figures |
+| `results/` | Experiment output: one CSV per phase, the full run log, `summary.md` and `figures/` |
+| `results/check_outlier.csv` | Repeat of one outlier run with a longer timeout (see Results) |
+| `snap.json` | The telemetry snapshot (a running `respawn` attack) the LLM delays were measured on |
+| `delays.txt` | Measured LLM decision times (median of 3 runs per model) |
+| `delays_cached_prompt.txt` | An earlier measurement with Ollama's prompt cache active; kept to show why it was redone |
 
 ## Requirements
 
@@ -75,12 +148,13 @@ chmod +x *.sh
 
 ```bash
 ./run_matrix.sh --dry-run                       # list every configuration + time estimate
-sudo ./run_matrix.sh --delay-small 4200 --delay-medium 15800 --delay-large 52000
+sudo ./run_matrix.sh --delay-small 36068 --delay-medium 171481 --delay-large 336088
 python3 summarize_results.py                    # tables + figures from results/
 ```
 
-The `--delay-*` values are the medians measured by `measure_llm_delay.sh`
-(see below); without them phase D is skipped. Each phase writes its own CSV:
+The `--delay-*` values are the LLM decision times we measured with
+`measure_llm_delay.sh` (see *Measured LLM decision times* below); without
+them phase D is skipped. Each phase writes its own CSV:
 
 | Phase | File | What varies | Hypothesis |
 |---|---|---|---|
@@ -203,6 +277,92 @@ project plan; the last 5 were added during implementation.
 | `alive_at_kill` | Attack processes alive when the kill was issued (how far it spread during the delay) |
 | `survivors_at_end` | Attack processes still alive at the timeout (0 if eradicated) |
 
+## Measured LLM decision times
+
+Measured with `measure_llm_delay.sh` on `snap.json` (a running `respawn`
+attack), 3 timed runs per model after an untimed warm-up, on the machine
+listed under Results. Each decision is the full two-call pattern from
+Project Part 3: telemetry analysis, then the PID choice.
+
+| `--llm-mode` | Model | Delay used | PID chosen |
+|---|---|---|---|
+| `small` | `tinyllama:latest` (1.1B) | **36,068 ms** | none: output never parsed as a PID (3/3 runs) |
+| `medium` | `llama3.2:3b` | **171,481 ms** (median) | 47015, the `respawn` **child** (3/3) |
+| `large` | `llama3.1:8b` | **336,088 ms** (median) | 47013, the `respawn` **parent** (3/3) |
+
+Notes:
+
+- **Prompt caching.** The first measurement (`delays_cached_prompt.txt`)
+  sent an identical prompt every run, so Ollama reused its processing of
+  that prompt and runs 2–3 were 2–4× faster than run 1. A real defender
+  sees new telemetry every cycle, so each run's prompt now starts with a
+  unique line, and those runs became consistent (`delays.txt`).
+- **TinyLlama.** Its runs 2–3 stayed fast even with the unique line. Its
+  context window is 2,048 tokens, which the telemetry most likely
+  exceeds, so Ollama truncates the beginning of the prompt (instructions
+  and unique line included). That would also explain why it never named a
+  PID. We therefore used its first, uncached run (36,068 ms) rather than
+  the median of 22,605 ms in `delays.txt`.
+- **Which PID the model flags matters.** The 3B model flagged the child,
+  and phase F shows every strategy then fails against `respawn`. The 8B
+  model flagged the parent, which `tree`, `stopkill` and `cgroup`
+  eradicate, but it took twice as long.
+
+## Results
+
+396 runs (132 configurations x 3 repetitions), all valid. Full tables are in
+[`results/summary.md`](results/summary.md), raw data in `results/*.csv`.
+
+**Machine:** Intel Core i5-8365U (4 cores / 8 threads, 1.60 GHz), 7.8 GiB RAM
+available to WSL2 (+ 2 GiB swap), Windows host, WSL2 kernel
+6.18.33.2-microsoft-standard-WSL2, cgroup v2, CPU-only Ollama inference (no GPU).
+
+### Every attack against every strategy (phase A)
+
+Eradicated runs out of 3; target = the attack's parent, fork rate 10/s,
+idle CPU, no delay.
+
+| technique | pid | pgrp | tree | stopkill | pidfd | cgroup | cgroup_early |
+|---|---|---|---|---|---|---|---|
+| respawn | 0/3 | 3/3 | 3/3 | 3/3 | 0/3 | 3/3 | 3/3 |
+| doublefork | 0/3 | **3/3** | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 |
+| hop | 0/3 | **0/3** | 3/3 | 3/3 | 0/3 | 3/3 | 3/3 |
+| watchdog | 0/3 | 3/3 | 3/3 | 3/3 | 0/3 | 3/3 | 3/3 |
+
+![Eradication rate by attack and strategy](results/figures/fig1_baseline_heatmap.png)
+
+### Hypotheses
+
+| | Hypothesis | Result |
+|---|---|---|
+| H1 | Per-PID and pidfd fail against fork-respawn above a fork-rate threshold | **Partly supported.** They failed at every fork rate tested (2, 10, 50/s), so there was no threshold: killing only the parent leaves the child running as an orphan. Fork rate changed how much survived (`doublefork`: about 1, 4, 19 survivors) but never the outcome. |
+| H2 | Process-group kill fails against hopping; tree walk fails against double-fork | **Confirmed.** `pgrp` vs `hop` 0/3; `tree` vs `doublefork` 0/3. |
+| H3 | Quarantine cgroup has the highest eradication rate, except for children forked before the move | **Partly supported.** `cgroup` tied with `pgrp`, `tree` and `stopkill` (9/12 each) and was the slowest to clear (44–55 ms vs 24–34 ms). It failed against `doublefork` exactly through the predicted escape window: the ~4 survivors are grandchildren born before the move. |
+| H4 | Longer inference delay lowers every strategy's success, unless the suspect is quarantined at detection time | **Confirmed.** During the delay `doublefork` grew from 5 processes to 363 (small), 1,705 (medium) and the 2,000 cap (large); `tree` and `cgroup` removed almost none of them. `cgroup_early` kept survivors at about 4 at every delay (99.8% removed at the medium delay). `pgrp` eradicated it at every delay. |
+| H5 | Broad strategies kill benign processes sharing the attacker's group or cgroup | **Confirmed.** With shared benign processes, `pgrp`, `tree` and `cgroup` killed 9/9 of them and `pid` 0/9. With separate benign processes, no strategy ever killed one. |
+
+![Share of the attack removed as inference delay grows](results/figures/fig4_delay.png)
+
+### Other findings
+
+- **CPU contention** made kills 3–4x slower (about 25 ms idle to 90–135 ms
+  under high load) but changed the outcome only once: `tree` vs `watchdog`
+  under high load lost 1 of 3 runs, when the partner restarted between the
+  scan and the kill. `stopkill`, which freezes everything first, won all 3.
+- **Targeting the newest process** instead of the parent (phase F) gave
+  0/48: strategies that work down the process tree cannot reach the
+  surviving parent or partner.
+- **Launch-time containment beat every strategy.** No termination strategy
+  defeated all four attacks, but the harness's own per-run cgroup, which
+  each attack ran in from launch, removed everything at teardown,
+  escaped `doublefork` grandchildren included.
+- **One outlier.** One `cgroup_early` vs `doublefork` run at the large
+  delay recorded 1,171 survivors at the 10-second timeout with no new
+  processes created. A repeat with a 60-second timeout
+  (`results/check_outlier.csv`) left 4 survivors, matching the other runs,
+  so the kernel had most likely not finished removing ~2,000 frozen
+  processes within 10 seconds.
+
 ## Design notes
 
 - **Survivors are found by command line, not by environment variable.** The
@@ -213,7 +373,9 @@ project plan; the last 5 were added during implementation.
   attack calls `exec()` again, every descendant keeps the original command
   line (`.../red_team/<attack> ... --tag <TAG>`), which `count_survivors.sh`
   matches with `pgrep`. Zombies are not counted (already dead); stopped
-  processes are counted (still alive).
+  processes are counted (still alive). The attacks still set `MARK`, and
+  their header comments describe finding it in `/proc`; that was the
+  original plan, and the harness no longer relies on it.
 - **The attacker runs in its own session and process group** (`setsid`),
   as malware launched independently would. Otherwise a process-group kill
   would also kill the harness. As an extra safeguard, the defender refuses
@@ -240,8 +402,12 @@ project plan; the last 5 were added during implementation.
 - `pidfd` and `pid` behave identically here. pidfd's advantage (it can never
   signal a recycled PID) only shows up under PID reuse, which these
   experiments don't produce.
-- Timings come from a VM/WSL2 guest and are affected by the host. The
-  machine configuration is reported with the results.
+- Timings come from a WSL2 guest and are affected by the Windows host.
+- `doublefork` hits the 2,000-process safety cap during the large delay, so
+  its growth levels off at about 2,000.
+- 3 repetitions per configuration; outcomes were almost always identical
+  across repetitions, but small differences in timing should not be
+  over-interpreted.
 - The defender is given the suspect PID; detection quality is not part of
   this project (that was Project Part 3).
 
