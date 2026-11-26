@@ -74,9 +74,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-/* pidfd_open() has no glibc wrapper on older glibc versions; call the
- * syscall directly so this builds on whatever glibc the grading
- * machine has. */
 #ifndef __NR_pidfd_open
 #define __NR_pidfd_open 434
 #endif
