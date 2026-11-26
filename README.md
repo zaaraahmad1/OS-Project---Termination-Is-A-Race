@@ -64,6 +64,7 @@ loop), **Scheduling** (CPU contention decides who runs first) and
 ```
 .
 ├── README.md                  this file
+├── docs/                      final report (PDF) and presentation slides (PPTX)
 ├── red_team/                  the 4 termination-resistant attacks (C) + Makefile
 │   ├── respawn.c  doublefork.c  hop.c  watchdog.c
 │   └── Makefile
