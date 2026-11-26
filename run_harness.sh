@@ -52,7 +52,7 @@
 #  10. record eradicated / time_to_clear_ms / respawns / benign harm
 #  11. tear everything down so one rep can never leak into the next
 #
-# CSV columns (the plan's 14, then 5 added at the end):
+# CSV columns (the proposal plan's 14, then 5 added at the end):
 #   run_id,timestamp,technique,strategy,fork_rate,cpu_load,llm_mode,
 #   delay_ms,eradicated,time_to_clear_ms,respawns,benign_killed,
 #   benign_total,operator,target,benign_share,valid,alive_at_kill,

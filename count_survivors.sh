@@ -15,7 +15,7 @@
 #
 # HOW A PROCESS IS IDENTIFIED (and why not the environment tag)
 # -------------------------------------------------------------
-# The project plan said to look for the tag in /proc/<pid>/environ. That
+# Our proposed project plan said to look for the tag in /proc/<pid>/environ. That
 # cannot work: the attacks set it with setenv("MARK", tag, 1) AFTER they
 # start, which only changes the copy of the environment in the process's
 # heap. /proc/<pid>/environ always shows the ORIGINAL environment from

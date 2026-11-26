@@ -6,13 +6,8 @@
 # Runs one attack briefly, records what the system's process list looks
 # like while it is running, then kills the attack. The result is the
 # "telemetry" that measure_llm_delay.sh shows to the LLM, so the model's
-# decision time is measured on a realistic snapshot of THIS project's
-# attacks (not a Part 3 virus).
-#
-# Same lesson as Part 3: Ollama's own inference processes (ollama,
-# llama-server) are left out of the snapshot. In Part 3 they were always
-# the top CPU user and buried the virus underneath the defender's own
-# footprint.
+# decision time is measured on a realistic snapshot of this project's
+# attacks.
 #
 # Does not need sudo.
 
