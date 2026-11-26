@@ -258,8 +258,8 @@ answers don't affect the OS-level comparison.
 
 ## Output: the result CSVs
 
-One row per repetition. The first 14 columns are the format agreed in the
-project plan; the last 5 were added during implementation.
+One row per repetition. The first 14 columns are the format we wrote about in the
+project plan, and we added the last 5 during implementation.
 
 | Column | Meaning |
 |---|---|
@@ -408,8 +408,6 @@ idle CPU, no delay.
 - 3 repetitions per configuration; outcomes were almost always identical
   across repetitions, but small differences in timing should not be
   over-interpreted.
-- The defender is given the suspect PID; detection quality is not part of
-  this project (that was Project Part 3).
 
 ## Cleaning up after an interrupted run
 
